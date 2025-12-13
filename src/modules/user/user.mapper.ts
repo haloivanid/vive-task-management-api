@@ -1,6 +1,8 @@
 import { UserTypeormEntity } from '../../database/entities/user.typeorm-entity';
 import { User } from './user.entity';
-import { UserResponseDto } from '../auth/dto/auth-response.dto';
+import { RegisterRequestDto } from '../auth/dto/request/register.request.dto';
+import * as bcrypt from 'bcryptjs';
+import { UserResponseDto } from './dto/response/user.response.dto';
 
 export class UserMapper {
   static toDomain(ormEntity: UserTypeormEntity): User {
@@ -17,7 +19,7 @@ export class UserMapper {
   }
 
   static toResponseDto(user: User): UserResponseDto {
-    return { id: user.id, email: user.email, createdAt: user.createdAt, updatedAt: user.updatedAt };
+    return { id: user.id, email: user.email, name: user.name, createdAt: user.createdAt, updatedAt: user.updatedAt };
   }
 
   static toOrmEntity(domain: User): UserTypeormEntity {
@@ -39,5 +41,29 @@ export class UserMapper {
 
   static toOrmEntityList(domains: User[]): UserTypeormEntity[] {
     return domains.map((domain) => this.toOrmEntity(domain));
+  }
+
+  static async fromRegisterRequestToOrmEntity(registerDto: RegisterRequestDto): Promise<UserTypeormEntity> {
+    const now = new Date();
+    const salt = await bcrypt.genSalt(10);
+    const password = await bcrypt.hash(registerDto.password, salt);
+
+    const ormEntity = new UserTypeormEntity();
+    ormEntity.email = registerDto.email;
+    ormEntity.password = password;
+    ormEntity.name = registerDto.name;
+    ormEntity.createdAt = now;
+    ormEntity.updatedAt = now;
+    return ormEntity;
+  }
+
+  static fromOrmToResponseDto(ormEntity: UserTypeormEntity): UserResponseDto {
+    return {
+      id: ormEntity.id,
+      email: ormEntity.email,
+      name: ormEntity.name,
+      createdAt: ormEntity.createdAt,
+      updatedAt: ormEntity.updatedAt,
+    };
   }
 }

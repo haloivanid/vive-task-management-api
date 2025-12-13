@@ -4,7 +4,7 @@ import { FindOptionsWhere, Repository } from 'typeorm';
 import { TaskTypeormEntity } from '../../../../database/entities/task.typeorm-entity';
 import { Task } from '../../task.entity';
 import { TaskMapper } from '../../task.mapper';
-import { GetMyTasksQuery } from '../../dto/get-my-tasks.query';
+import { GetMyTasksQuery } from '../../services/query/get-my-task.query';
 
 @QueryHandler(GetMyTasksQuery)
 export class GetMyTasksHandler implements IQueryHandler<GetMyTasksQuery> {

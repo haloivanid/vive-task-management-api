@@ -31,7 +31,6 @@ export class ProjectTypeormEntity {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  // Relations
   @ManyToOne(() => UserTypeormEntity, (user) => user.ownedProjects, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'owner_id' })
   owner: UserTypeormEntity;
@@ -42,7 +41,6 @@ export class ProjectTypeormEntity {
   @OneToMany(() => TaskTypeormEntity, (task) => task.project)
   tasks: TaskTypeormEntity[];
 
-  // Helper methods
   updateDetails(updates: Partial<Pick<ProjectTypeormEntity, 'name' | 'description' | 'color'>>): void {
     if (updates.name !== undefined) this.name = updates.name;
     if (updates.description !== undefined) this.description = updates.description;
@@ -53,7 +51,6 @@ export class ProjectTypeormEntity {
     return this.ownerId === userId;
   }
 
-  // Static factory method
   static create(owner: UserTypeormEntity, name: string, description?: string, color?: string): ProjectTypeormEntity {
     const project = new ProjectTypeormEntity();
     project.owner = owner;

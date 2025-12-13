@@ -59,7 +59,6 @@ export class TaskTypeormEntity {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  // Relations
   @ManyToOne(() => ProjectTypeormEntity, (project) => project.tasks, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'project_id' })
   project: ProjectTypeormEntity;
@@ -74,7 +73,6 @@ export class TaskTypeormEntity {
   @Column({ name: 'assigned_user_id', nullable: true })
   assignedUserId: number | null;
 
-  // Helper methods
   assignTo(user: UserTypeormEntity): void {
     this.assignedUser = user;
     this.assignedUserId = user.id;
@@ -99,7 +97,6 @@ export class TaskTypeormEntity {
     if (updates.priority !== undefined) this.priority = updates.priority;
   }
 
-  // Static factory method
   static create(
     project: ProjectTypeormEntity,
     title: string,

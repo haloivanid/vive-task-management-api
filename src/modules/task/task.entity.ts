@@ -119,7 +119,6 @@ export class Task {
     );
   }
 
-  // Getters
   get id(): number {
     return this._id;
   }
@@ -168,7 +167,6 @@ export class Task {
     return this._updatedAt;
   }
 
-  // Domain methods
   updateDetails(updates: {
     title?: string;
     description?: string | null;

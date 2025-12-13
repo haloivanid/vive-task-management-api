@@ -1,35 +1,38 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { RegisterUserDto } from './dto/register-user.dto';
-import { AuthResponseDto, AuthErrorResponseDto } from './dto/auth-response.dto';
-import { UserMapper } from '../user/user.mapper';
+import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { RegisterRequestDto } from './dto/request/register.request.dto';
 import { AuthGuard } from '@nestjs/passport';
+import { LoginResponseDto } from './dto/response/login.response.dto';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
+import { LoginQuery } from './services/query/login.query';
+import { LoginRequestDto } from './dto/request/login.request.dto';
+import { plainToInstance } from 'class-transformer';
+import { JwtBlacklist } from './jwt/jwt.blacklist';
+import { FastifyRequest } from 'fastify';
+import { RegisterCommand } from './services/command/register.command';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly queryBus: QueryBus,
+    private readonly commandBus: CommandBus,
+  ) {}
 
   @Post('register')
-  async register(@Body() registerUserDto: RegisterUserDto): Promise<AuthResponseDto | AuthErrorResponseDto> {
-    try {
-      const user = await this.authService.register(registerUserDto);
-      return { status: 'success', data: UserMapper.toResponseDto(user) };
-    } catch (error) {
-      return { status: 'error', message: 'An error occurred during registration' };
-    }
+  async register(@Body() registerUserDto: RegisterRequestDto): Promise<null> {
+    const registerCommand = new RegisterCommand(registerUserDto);
+    return this.commandBus.execute(registerCommand);
   }
 
   @Post('login')
-  async login(@Body() loginDto: any): Promise<AuthResponseDto | AuthErrorResponseDto> {
-    // TODO: Implement login logic
-    return { status: 'error', message: 'Not implemented' };
+  async login(@Body() loginDto: LoginRequestDto): Promise<LoginResponseDto> {
+    const loginQuery = plainToInstance(LoginQuery, loginDto);
+    return this.queryBus.execute(loginQuery);
   }
 
   @Post('logout')
   @UseGuards(AuthGuard('jwt'))
-  async logout(): Promise<{ status: string; message: string }> {
-    // In a real application, you might want to invalidate the token here
-    // For now, we'll just return success
-    return { status: 'success', message: 'Logged out successfully' };
+  async logout(@Req() req: FastifyRequest): Promise<null> {
+    JwtBlacklist.blacklist(req.headers.authorization as string);
+    return null;
   }
 }

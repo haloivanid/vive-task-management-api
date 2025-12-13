@@ -131,13 +131,13 @@ export class User {
   }
 
   private async hashPassword(password: string): Promise<string> {
-    const bcrypt = await import('bcrypt');
+    const bcrypt = await import('bcryptjs');
     const salt = await bcrypt.genSalt();
     return bcrypt.hash(password, salt);
   }
 
   private async comparePassword(plainText: string, hashed: string): Promise<boolean> {
-    const bcrypt = await import('bcrypt');
+    const bcrypt = await import('bcryptjs');
     return bcrypt.compare(plainText, hashed);
   }
 

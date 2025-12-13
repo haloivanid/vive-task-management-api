@@ -9,7 +9,6 @@ import {
   BeforeUpdate,
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
-import * as bcrypt from 'bcrypt';
 import { ProjectTypeormEntity } from './project.typeorm-entity';
 import { TaskTypeormEntity } from './task.typeorm-entity';
 
@@ -41,38 +40,9 @@ export class UserTypeormEntity {
   @UpdateDateColumn({ name: 'updated_at' })
   updatedAt: Date;
 
-  // Relations
   @OneToMany(() => ProjectTypeormEntity, (project) => project.owner)
   ownedProjects: ProjectTypeormEntity[];
 
   @OneToMany(() => TaskTypeormEntity, (task) => task.assignedUser)
   tasks: TaskTypeormEntity[];
-
-  // Hooks
-  @BeforeInsert()
-  @BeforeUpdate()
-  async hashPassword() {
-    if (this.password) {
-      const salt = await bcrypt.genSalt();
-      this.password = await bcrypt.hash(this.password, salt);
-    }
-  }
-
-  // Helper methods
-  async validatePassword(password: string): Promise<boolean> {
-    return bcrypt.compare(password, this.password);
-  }
-
-  hasVerifiedEmail(): boolean {
-    return this.emailVerifiedAt !== null;
-  }
-
-  markEmailAsVerified(): void {
-    this.emailVerifiedAt = new Date();
-  }
-
-  // For password reset functionality
-  getEmailForPasswordReset(): { email: string; name: string } {
-    return { email: this.email, name: this.name };
-  }
 }

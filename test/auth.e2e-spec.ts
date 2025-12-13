@@ -27,7 +27,7 @@ describe('AuthController (e2e)', () => {
             database: config.get('DB_DATABASE', 'test_db'),
             entities: [User],
             synchronize: true,
-            dropSchema: true, // Be careful with this in production!
+            dropSchema: true,
           }),
           inject: [ConfigService],
         }),
@@ -87,7 +87,6 @@ describe('AuthController (e2e)', () => {
     let refreshToken: string;
 
     beforeAll(async () => {
-      // First login to get a refresh token
       const response = await request(app.getHttpServer())
         .post('/auth/login')
         .send({ email: testUser.email, password: testUser.password });
@@ -110,7 +109,6 @@ describe('AuthController (e2e)', () => {
     let accessToken: string;
 
     beforeAll(async () => {
-      // First login to get an access token
       const response = await request(app.getHttpServer())
         .post('/auth/login')
         .send({ email: testUser.email, password: testUser.password });
